@@ -39,28 +39,37 @@ def pred_with_pt(img, pb_file_path):
 
             return img_out_softmax
 
+def preprocess(img):
+    """
+    这里是通过查看源码得到的VGG16的预处理的方式
+    :param img:
+    :return:
+    """
+    img = img.astype('float64')
+    mean = [103.939, 116.779, 123.68]
+    img = img[..., ::-1]
+    img[..., 0] -= mean[0]
+    img[..., 1] -= mean[1]
+    img[..., 2] -= mean[2]
+    return img
+
 
 if __name__ == '__main__':
-    img = cv2.imread("data/test_set/test_set/cats/cat.4001.jpg")
+    img = cv2.imread("data/test_set/test_set/cats/cat.4001.jpg") # 这里读取的时候就已经是BGR的顺序了
     img = cv2.resize(img,(224,224))
     print(img.shape)
     # cv2.imshow("src",img)
 
-    # 取均值化：移除图像的平均亮度值，去除图像的光照亮度干扰
-    test = np.mean(img, axis=0)
-    rs_img = img - test
-    cv2.imshow("1",rs_img)
+    # 取均值化：移除图像的平均亮度值，去除图像的光照亮度干扰,减去数据对应维度的统计平均值，来消除公共的部分，以凸显个体之间的特征和差异
+    a = preprocess(img)
+    cv2.imshow("process1", a)
+
 
     # 预处理
     processed_img = preprocess_input(img)
     cv2.imshow("preprocess",processed_img)
     cv2.waitKey(0)
     processed_img = np.expand_dims(processed_img,axis=0)
-    rs_img = np.expand_dims(rs_img,axis=0)
-
-
-
-
     print(processed_img.shape)
 
 

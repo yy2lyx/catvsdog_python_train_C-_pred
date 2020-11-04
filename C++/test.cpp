@@ -51,25 +51,50 @@ void CVMat_to_Tensor(Mat img, Tensor* output_tensor, int input_rows, int input_c
     resize(img, img, cv::Size(input_cols, input_rows));
     //imshow("resized image",img);
 
-    //归一化
-    img.convertTo(img, CV_32FC1);
-    img = 1 - img / 255;
+    //去均值
+    img.convertTo(img, CV_32FC3);
+    vector<float> mean = {103.939,116.779,123.68};
+    // 遍历所有的像素的每个通道，减去对应的均值（BGR这种顺序）
+    for (int row = 0; row < img.rows;row++) {
+        for (int col = 0; col < img.cols;col++) {
+            img.at<Vec3f>(row, col)[0] -= mean[0];
+            img.at<Vec3f>(row, col)[1] -= mean[1];
+            img.at<Vec3f>(row, col)[2] -= mean[2];
+        }
+    }
+    imshow("preprocess",img);
+    waitKey(0);
+    //img = 1 - img / 255;
 
     //创建一个指向tensor的内容的指针
     float* p = output_tensor->flat<float>().data();
 
     //创建一个Mat，与tensor的指针绑定,改变这个Mat的值，就相当于改变tensor的值
-    cv::Mat tempMat(input_rows, input_cols, CV_32FC1, p);
-    img.convertTo(tempMat, CV_32FC1);
+    cv::Mat tempMat(input_rows, input_cols, CV_32FC3, p);
+    img.convertTo(tempMat, CV_32FC3);
 
     //    waitKey(0);
 
 }
 
+Mat SubtractImageAvePixel(const Mat image, int AvePixel)
+{
+    Mat SubtractMat;
+    SubtractMat = image.clone();
+    float SumPixels = 0.0f;
+    for (int i = 0; i < image.rows; i++)
+        for (int j = 0; j < image.cols; j++)
+            for (int n = 0; n < image.channels(); n++)
+                SubtractMat.at<uchar>(i, j * SubtractMat.channels() + n) = image.at<uchar>(i, j * image.channels() + n) - AvePixel;   //取得像素
+    return SubtractMat;
+}
+
+
+
 int main(int argc, char** argv)
 {
     /*--------------------------------配置关键信息------------------------------*/
-    string model_path = "D:/pycharm_project/dogcat/model.pt";
+    string model_path = "D:/pycharm_project/dogcat/model/model.pt";
     string image_path = "D:/pycharm_project/dogcat/data/test_set/test_set/cats/cat.4001.jpg";
     int input_height = 224;
     int input_width = 224;
@@ -98,11 +123,17 @@ int main(int argc, char** argv)
 
     /*---------------------------------载入测试图片-------------------------------------*/
     cout << endl << "<------------loading test_image-------------->" << endl;
-    Mat img = imread(image_path, 0);
+    Mat img = imread(image_path);
+
+    imshow("src", img);
+ 
     if (img.empty())
     {
         cout << "can't open the image!!!!!!!" << endl;
         return -1;
+    }
+    else {
+        cout << "Loaded image!" << endl;
     }
 
     //创建一个tensor作为输入网络的接口
