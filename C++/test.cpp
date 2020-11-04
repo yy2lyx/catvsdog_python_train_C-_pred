@@ -69,8 +69,8 @@ void CVMat_to_Tensor(Mat img, Tensor* output_tensor, int input_rows, int input_c
 int main(int argc, char** argv)
 {
     /*--------------------------------≈‰÷√πÿº¸–≈œ¢------------------------------*/
-    string model_path = "D:/yeyan/pycharm_project/dogcat/model.pt";
-    string image_path = "D:/yeyan/pycharm_project/dogcat/data/test_set/test_set/cats/cat.4001.jpg";
+    string model_path = "D:/pycharm_project/dogcat/model.pt";
+    string image_path = "D:/pycharm_project/dogcat/data/test_set/test_set/cats/cat.4001.jpg";
     int input_height = 224;
     int input_width = 224;
     string input_tensor_name = "conv2d_input";
